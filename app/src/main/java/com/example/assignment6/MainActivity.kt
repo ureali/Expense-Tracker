@@ -33,6 +33,6 @@ class MainActivity : AppCompatActivity() {
 
     fun showName(view: View) {
         val name = nameEditText.text.toString()
-        nameOutputTextView.text = name
+        nameOutputTextView.text = "Hello, $name!";
     }
 }
