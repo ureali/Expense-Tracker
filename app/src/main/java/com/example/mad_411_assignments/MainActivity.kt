@@ -35,7 +35,7 @@ class MainActivity : AppCompatActivity() {
         // developer.android.com ♥
         // creating dataset
         val dataset = mutableListOf<Expense>()
-        val expenseAdapter = ExpenseAdapter(dataset)
+        expenseAdapter = ExpenseAdapter(dataset)
 
         // setting up recycler
         val recyclerView: RecyclerView = findViewById(R.id.expenseRecyclerView)
@@ -44,6 +44,11 @@ class MainActivity : AppCompatActivity() {
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.adapter = expenseAdapter
 
+
+        // adding onclick event listener
+        addNewExpenseButton.setOnClickListener {
+            addExpense()
+        }
     }
 
     // separate method for adding expense
