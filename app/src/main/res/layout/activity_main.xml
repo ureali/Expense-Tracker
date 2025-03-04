@@ -10,7 +10,7 @@
     <EditText
         android:id="@+id/expenseNameEditText"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_marginTop="40dp"
         android:layout_marginEnd="100dp"
         android:ems="10"
@@ -22,7 +22,7 @@
     <EditText
         android:id="@+id/expenseAmountEditText"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_marginTop="20dp"
         android:layout_marginEnd="100dp"
         android:ems="10"
@@ -44,7 +44,7 @@
     <EditText
         android:id="@+id/expenseDateEditText"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_marginTop="24dp"
         android:layout_marginEnd="100dp"
         android:ems="10"
@@ -54,10 +54,12 @@
         app:layout_constraintTop_toBottomOf="@+id/expenseAmountEditText" />
 
     <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/expenseRecyclerView"
         android:layout_width="411dp"
         android:layout_height="440dp"
         android:layout_marginTop="9dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addNewExpenseButton" />
+        app:layout_constraintTop_toBottomOf="@+id/addNewExpenseButton"
+        tools:listitem="@layout/expense" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

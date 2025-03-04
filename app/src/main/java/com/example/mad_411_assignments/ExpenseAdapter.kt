@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.example.assignment6.R
 import java.util.Locale
 
 // developer.android.com directed me here
@@ -60,4 +59,9 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>):RecyclerView.Ada
 
     }
 
+    // need to insert new expense from other files
+    fun addExpense(expense: Expense) {
+        dataSet.add(expense)
+        notifyItemInserted(dataSet.size - 1)
+    }
 }
