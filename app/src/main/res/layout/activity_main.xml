@@ -9,9 +9,10 @@
 
     <EditText
         android:id="@+id/expenseNameEditText"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginTop="40dp"
+        style="@android:style/Widget.Material.EditText"
+        android:layout_width="208dp"
+        android:layout_height="52dp"
+        android:layout_marginTop="44dp"
         android:layout_marginEnd="100dp"
         android:ems="10"
         android:hint="Enter Expense Name"
@@ -21,6 +22,7 @@
 
     <EditText
         android:id="@+id/expenseAmountEditText"
+        style="@android:style/Widget.Material.EditText"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
         android:layout_marginTop="20dp"
@@ -33,25 +35,16 @@
 
     <Button
         android:id="@+id/addNewExpenseButton"
+        style="@style/Widget.Material3.Button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
+        android:layout_marginStart="139dp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="140dp"
         android:text="Add Expense"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/expenseDateEditText" />
-
-    <EditText
-        android:id="@+id/expenseDateEditText"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="100dp"
-        android:ems="10"
-        android:hint="Enter Expense Date"
-        android:inputType="date"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/expenseAmountEditText" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/datePickerButton" />
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/expenseRecyclerView"
@@ -61,5 +54,19 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/addNewExpenseButton"
         tools:listitem="@layout/expense" />
+
+    <Button
+        android:id="@+id/datePickerButton"
+        style="@style/Widget.Material3.Button.OutlinedButton"
+        android:layout_width="125dp"
+        android:layout_height="57dp"
+        android:layout_marginStart="160dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="161dp"
+        android:text="Pick Date"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.473"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/expenseAmountEditText" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
