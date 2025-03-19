@@ -1,15 +1,19 @@
 package com.example.mad_411_assignments
 
+import android.content.Context
+import android.content.Intent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Locale
 
 // developer.android.com directed me here
-class ExpenseAdapter(private val dataSet: MutableList<Expense>):RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
+// added context
+class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Context):RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
     class ExpenseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         // from what I understood, item in recycle view is a separate layout
         // here I "find" the elements there
@@ -17,6 +21,7 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>):RecyclerView.Ada
         val amountTextView = view.findViewById<TextView>(R.id.amountTextView)
         val dateTextView = view.findViewById<TextView>(R.id.dateTextView)
         val deleteButton = view.findViewById<TextView>(R.id.deleteButton)
+        val detailsButton = view.findViewById<TextView>(R.id.detailsButton)
 
     }
 
@@ -37,11 +42,10 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>):RecyclerView.Ada
         val expense = dataSet[position]
 
         // populating textViews
-        holder.expenseTextView.text = expense.name.toString();
-        holder.dateTextView.text = expense.date.toString();
+        holder.expenseTextView.text = expense.name.toString()
+        holder.dateTextView.text = expense.date.toString()
         // IntelliJ wanted String.format(), happy to oblige.
         holder.amountTextView.text = String.format(Locale.getDefault(), "$%.2f", expense.amount)
-        holder.expenseTextView.text = expense.name.toString();
 
         // event listener
         holder.deleteButton.setOnClickListener {
@@ -57,6 +61,16 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>):RecyclerView.Ada
             }
         }
 
+        // changing activity
+        holder.detailsButton.setOnClickListener {
+            val intent = Intent(context, ExpenseDetailsActivity::class.java)
+            intent.putExtra("EXPENSE_NAME", expense.name)
+            intent.putExtra("EXPENSE_DATE", expense.date)
+            // amount is saved as Double, converting to string
+            intent.putExtra("EXPENSE_AMOUNT", expense.amount)
+            context.startActivity(intent)
+
+        }
     }
 
     // need to insert new expense from other files

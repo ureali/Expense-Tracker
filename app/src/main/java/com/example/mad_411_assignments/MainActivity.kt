@@ -1,6 +1,8 @@
 package com.example.mad_411_assignments
 
 import android.app.DatePickerDialog
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.PersistableBundle
 import android.util.Log
@@ -23,7 +25,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var expenseAmountEditText: EditText
     private lateinit var datePickerButton: Button
     private lateinit var addNewExpenseButton: Button
+    private lateinit var financialTipsButton: Button
     private lateinit var expenseAdapter: ExpenseAdapter
+
+    private val financialTipsLink = "https://www.victorianvoices.net/ARTICLES/CFM/CFM1878/CFM1878-PennyBanks.pdf"
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,11 +45,12 @@ class MainActivity : AppCompatActivity() {
         expenseAmountEditText = findViewById<EditText>(R.id.expenseAmountEditText)
         datePickerButton = findViewById<Button>(R.id.datePickerButton)
         addNewExpenseButton = findViewById<Button>(R.id.addNewExpenseButton)
+        financialTipsButton = findViewById<Button>(R.id.financialTipsButton)
 
         // developer.android.com ♥
         // creating dataset
         val dataset = mutableListOf<Expense>()
-        expenseAdapter = ExpenseAdapter(dataset)
+        expenseAdapter = ExpenseAdapter(dataset, this)
 
         // setting up recycler
         val recyclerView: RecyclerView = findViewById(R.id.expenseRecyclerView)
@@ -61,6 +67,12 @@ class MainActivity : AppCompatActivity() {
 
         datePickerButton.setOnClickListener {
             showDateDialog()
+        }
+
+        financialTipsButton.setOnClickListener {
+            val intent = Intent(Intent.ACTION_VIEW)
+            intent.data = Uri.parse(financialTipsLink)
+            startActivity(intent)
         }
     }
 

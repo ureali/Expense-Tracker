@@ -53,9 +53,10 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/expenseRecyclerView"
         android:layout_width="match_parent"
-        android:layout_height="440dp"
-        android:layout_marginTop="9dp"
+        android:layout_height="352dp"
+        android:layout_marginTop="76dp"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/addNewExpenseButton"
         tools:listitem="@layout/expense" />
@@ -73,5 +74,17 @@
         app:layout_constraintHorizontal_bias="0.473"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/expenseAmountEditText" />
+
+    <Button
+        android:id="@+id/financialTipsButton"
+        android:layout_width="wrap_content"
+        android:layout_height="48dp"
+        android:layout_marginStart="160dp"
+        android:layout_marginTop="13dp"
+        android:layout_marginEnd="161dp"
+        android:text="Financial Tips"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/addNewExpenseButton" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
