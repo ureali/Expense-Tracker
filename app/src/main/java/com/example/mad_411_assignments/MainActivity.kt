@@ -5,15 +5,20 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.os.PersistableBundle
+import android.text.TextUtils.replace
 import android.util.Log
 import android.widget.Button
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.fragment.app.commit
+import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import java.text.SimpleDateFormat
@@ -25,10 +30,12 @@ class MainActivity : AppCompatActivity() {
     private lateinit var expenseAmountEditText: EditText
     private lateinit var datePickerButton: Button
     private lateinit var addNewExpenseButton: Button
-    private lateinit var financialTipsButton: Button
     private lateinit var expenseAdapter: ExpenseAdapter
 
-    private val financialTipsLink = "https://www.victorianvoices.net/ARTICLES/CFM/CFM1878/CFM1878-PennyBanks.pdf"
+    private val viewModel: TotalAmountViewModel by viewModels()
+
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,16 +48,34 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
+        // fragments
+        // For some reason androidx.fragment.app wasn't implemented by default in gradle
+        // had to add it manually for it to work
+
+        // android docs told me that it's "using the FragmentManager to create a FragmentTransaction"
+        // I hope that satisfies "Add HeaderFragment and FooterFragment dynamically using
+        // FragmentTransaction and FragmentManager."
+        supportFragmentManager.commit {
+            replace(R.id.headerFrameLayout, HeaderFragment())
+            addToBackStack(null)
+        }
+
+        val footerFragment = FooterFragment(viewModel)
+
+        supportFragmentManager.commit {
+            replace(R.id.footerFrameLayout, footerFragment)
+            addToBackStack(null)
+        }
+
         expenseNameEditText = findViewById<EditText>(R.id.expenseNameEditText)
         expenseAmountEditText = findViewById<EditText>(R.id.expenseAmountEditText)
         datePickerButton = findViewById<Button>(R.id.datePickerButton)
         addNewExpenseButton = findViewById<Button>(R.id.addNewExpenseButton)
-        financialTipsButton = findViewById<Button>(R.id.financialTipsButton)
 
         // developer.android.com ♥
         // creating dataset
         val dataset = mutableListOf<Expense>()
-        expenseAdapter = ExpenseAdapter(dataset, this)
+        expenseAdapter = ExpenseAdapter(dataset, this, viewModel, footerFragment)
 
         // setting up recycler
         val recyclerView: RecyclerView = findViewById(R.id.expenseRecyclerView)
@@ -69,11 +94,6 @@ class MainActivity : AppCompatActivity() {
             showDateDialog()
         }
 
-        financialTipsButton.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW)
-            intent.data = Uri.parse(financialTipsLink)
-            startActivity(intent)
-        }
     }
 
     // separate method for adding expense

@@ -2,18 +2,22 @@ package com.example.mad_411_assignments
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import androidx.core.content.ContextCompat.startActivity
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView
 import java.util.Locale
 
 // developer.android.com directed me here
 // added context
-class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Context):RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
+class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Context, var totalAmountViewModel: TotalAmountViewModel, var footerFragment: FooterFragment):RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
+
     class ExpenseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         // from what I understood, item in recycle view is a separate layout
         // here I "find" the elements there
@@ -56,6 +60,9 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Cont
             if (index != -1) {
                 // removing
                 dataSet.removeAt(index)
+                totalAmountViewModel.totalAmount -= expense.amount
+                // updating footer
+                footerFragment.updateAmount()
                 // need to notify to update the recycle view
                 notifyItemRemoved(index)
             }
@@ -76,6 +83,8 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Cont
     // need to insert new expense from other files
     fun addExpense(expense: Expense) {
         dataSet.add(expense)
+        totalAmountViewModel.totalAmount += expense.amount
+        footerFragment.updateAmount()
         notifyItemInserted(dataSet.size - 1)
     }
 }
