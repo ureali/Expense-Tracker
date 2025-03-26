@@ -16,7 +16,7 @@ import java.util.Locale
 
 // developer.android.com directed me here
 // added context
-class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Context, var totalAmountViewModel: TotalAmountViewModel, var footerFragment: FooterFragment):RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
+class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Context, var totalAmountViewModel: TotalAmountViewModel, var footerFragment: FooterFragment, var saveExpensesLambda: (context:Context, dataset:MutableList<Expense>) -> Unit):RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
 
     class ExpenseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         // from what I understood, item in recycle view is a separate layout
@@ -66,6 +66,8 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Cont
                 // need to notify to update the recycle view
                 notifyItemRemoved(index)
             }
+
+            saveExpensesLambda(context, dataSet)
         }
 
         // changing activity

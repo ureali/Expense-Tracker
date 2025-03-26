@@ -1,6 +1,7 @@
 package com.example.mad_411_assignments
 
 import android.app.DatePickerDialog
+import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -21,9 +22,16 @@ import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
+
+private const val FILE_NAME = "expenses.txt"
 
 class MainActivity : AppCompatActivity() {
     private lateinit var expenseNameEditText: EditText
@@ -75,7 +83,12 @@ class MainActivity : AppCompatActivity() {
         // developer.android.com ♥
         // creating dataset
         val dataset = mutableListOf<Expense>()
-        expenseAdapter = ExpenseAdapter(dataset, this, viewModel, footerFragment)
+
+        // loading expenses
+        dataset.clear()
+        dataset.addAll(loadExpensesFromFile(this))
+
+        expenseAdapter = ExpenseAdapter(dataset, this, viewModel, footerFragment, ::saveExpensesToFile)
 
         // setting up recycler
         val recyclerView: RecyclerView = findViewById(R.id.expenseRecyclerView)
@@ -88,6 +101,7 @@ class MainActivity : AppCompatActivity() {
         // adding onclick event listener
         addNewExpenseButton.setOnClickListener {
             addExpense()
+            saveExpensesToFile(this, dataset)
         }
 
         datePickerButton.setOnClickListener {
@@ -155,6 +169,43 @@ class MainActivity : AppCompatActivity() {
 
         // showing date picker
         datePicker.show()
+    }
+
+    private fun saveExpensesToFile(context: Context, taskList: MutableList<Expense>) {
+        try {
+            val json = Gson().toJson(taskList)
+            context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE).use { output ->
+                output.write(json.toByteArray())
+            }
+            Log.d("FileStorage", "Expenses saved successfully")
+        } catch (e: IOException) {
+            Log.e("FileStorage", "Error saving expenses: ${e.message}")
+        }
+    }
+
+    private fun loadExpensesFromFile(context: Context): MutableList<Expense> {
+        val taskList: MutableList<Expense> = mutableListOf()
+        try {
+            val file = File(context.filesDir, FILE_NAME)
+            if (!file.exists()) return taskList
+
+            // using openFIleInput
+            context.openFileInput(FILE_NAME).use { input ->
+                // does the same job as file.readText()
+                // it's extension function from Kotlin
+                val json = input.bufferedReader().use { it.readText() }
+                val type = object : TypeToken<List<Expense>>() {}.type
+                val loadedTasks: List<Expense> = Gson().fromJson(json, type)
+                taskList.addAll(loadedTasks)
+                Log.d("FileStorage", "Expenses loaded successfully")
+        }
+
+        } catch (e: FileNotFoundException) {
+            Log.e("FileStorage", "File not found: ${e.message}")
+        } catch (e: IOException) {
+            Log.e("FileStorage", "Error reading file: ${e.message}")
+        }
+        return taskList
     }
 
     override fun onStart() {
