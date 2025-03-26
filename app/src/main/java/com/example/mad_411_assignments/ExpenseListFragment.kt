@@ -74,6 +74,7 @@ class ExpenseListFragment : Fragment() {
         // loading expenses
         dataset.clear()
         dataset.addAll(loadExpensesFromFile(this.requireContext()))
+        viewModel.totalAmount = dataset.sumOf { it.amount }
 
         expenseAdapter = ExpenseAdapter(dataset, this.requireContext(), viewModel, footerFragment,
             ::saveExpensesToFile, ::onDetailsClick)
