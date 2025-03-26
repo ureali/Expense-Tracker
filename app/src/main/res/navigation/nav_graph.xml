@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    app:startDestination="@id/mainFragment">
+
+    <!-- Main Fragment (Expenses List) -->
+    <fragment
+        android:id="@+id/mainFragment"
+        android:name="com.example.mad_411_assignments.ExpenseListFragment"
+        android:label="Expenses List"
+        tools:layout="@layout/fragment_expense_list">
+
+        <!-- Action: Navigate to Expense Details -->
+        <action
+            android:id="@+id/action_mainFragment_to_expenseDetailsFragment"
+            app:destination="@id/expenseDetailsFragment" />
+
+    </fragment>
+
+    <!-- Expense Details Fragment -->
+    <fragment
+        android:id="@+id/expenseDetailsFragment"
+        android:name="com.example.mad_411_assignments.ExpenseDetailsFragment"
+        android:label="Expense Details"
+        tools:layout="@layout/activity_expense_details" />
+</navigation>

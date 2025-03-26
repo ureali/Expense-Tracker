@@ -16,7 +16,10 @@ import java.util.Locale
 
 // developer.android.com directed me here
 // added context
-class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Context, var totalAmountViewModel: TotalAmountViewModel, var footerFragment: FooterFragment, var saveExpensesLambda: (context:Context, dataset:MutableList<Expense>) -> Unit):RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
+class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Context,
+                     var totalAmountViewModel: TotalAmountViewModel, var footerFragment: FooterFragment,
+                     var saveExpensesLambda: (context:Context, dataset:MutableList<Expense>) -> Unit,
+                     var onDetailsClick: (expense:Expense) -> Unit,):RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
 
     class ExpenseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         // from what I understood, item in recycle view is a separate layout
@@ -72,12 +75,7 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Cont
 
         // changing activity
         holder.detailsButton.setOnClickListener {
-            val intent = Intent(context, ExpenseDetailsActivity::class.java)
-            intent.putExtra("EXPENSE_NAME", expense.name)
-            intent.putExtra("EXPENSE_DATE", expense.date)
-            // amount is saved as Double, converting to string
-            intent.putExtra("EXPENSE_AMOUNT", expense.amount)
-            context.startActivity(intent)
+            onDetailsClick(expense)
 
         }
     }

@@ -1,97 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:fitsSystemWindows="true"
     tools:context=".MainActivity">
 
-    <EditText
-        android:id="@+id/expenseNameEditText"
-        style="@android:style/Widget.Material.EditText"
-        android:layout_width="208dp"
-        android:layout_height="52dp"
-        android:layout_marginStart="103dp"
-        android:layout_marginTop="44dp"
-        android:layout_marginEnd="100dp"
-        android:ems="10"
-        android:hint="Enter Expense Name"
-        android:inputType="text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
 
-    <EditText
-        android:id="@+id/expenseAmountEditText"
-        style="@android:style/Widget.Material.EditText"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_marginStart="102dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="100dp"
-        android:ems="10"
-        android:hint="Enter Expense Amount"
-        android:inputType="text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/expenseNameEditText" />
-
-    <Button
-        android:id="@+id/addNewExpenseButton"
-        style="@style/Widget.Material3.Button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="140dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="139dp"
-        android:text="Add Expense"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/datePickerButton" />
-
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/expenseRecyclerView"
+    <!-- Navigation Container -->
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragmentContainer"
+        android:name="androidx.navigation.fragment.NavHostFragment"
         android:layout_width="match_parent"
-        android:layout_height="425dp"
-        android:layout_marginTop="16dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/addNewExpenseButton"
-        tools:listitem="@layout/expense" />
+        android:layout_height="match_parent"
+        app:navGraph="@navigation/nav_graph"
+        app:defaultNavHost="true" />
 
-    <Button
-        android:id="@+id/datePickerButton"
-        style="@style/Widget.Material3.Button.OutlinedButton"
-        android:layout_width="112dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="16dp"
-        android:layout_marginEnd="161dp"
-        android:text="Pick Date"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.473"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/expenseAmountEditText" />
-
-    <FrameLayout
-        android:id="@+id/headerFrameLayout"
-        android:layout_width="match_parent"
-        android:layout_height="33dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
-
-    </FrameLayout>
-
-    <FrameLayout
-        android:id="@+id/footerFrameLayout"
-        android:layout_width="match_parent"
-        android:layout_height="64dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent">
-
-    </FrameLayout>
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</LinearLayout>
