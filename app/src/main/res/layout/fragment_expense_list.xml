@@ -57,11 +57,11 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/expenseRecyclerView"
-        android:layout_width="match_parent"
-        android:layout_height="425dp"
-        android:layout_marginTop="22dp"
+        android:layout_width="451dp"
+        android:layout_height="480dp"
+        android:layout_marginTop="60dp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.333"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/addNewExpenseButton"
         tools:listitem="@layout/expense" />
@@ -69,11 +69,11 @@
     <Button
         android:id="@+id/datePickerButton"
         style="@style/Widget.Material3.Button.OutlinedButton"
-        android:layout_width="112dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="160dp"
-        android:layout_marginTop="40dp"
-        android:layout_marginEnd="161dp"
+        android:layout_width="134dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="142dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="172dp"
         android:text="Pick Date"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -98,7 +98,7 @@
 
     </FrameLayout>
 
-    <CheckBox
+    <com.google.android.material.checkbox.MaterialCheckBox
         android:id="@+id/conversionNeededCheckBox"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -111,6 +111,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/expenseAmountEditText" />
 
+    <!-- NO SPINNER EQUIVALENT IN MATERIAL DESIGN -->
     <Spinner
         android:id="@+id/currencySpinner"
         android:layout_width="match_parent"
@@ -122,16 +123,17 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/conversionNeededCheckBox" />
 
-    <TextView
+    <com.google.android.material.textview.MaterialTextView
         android:id="@+id/convertedAmount"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="147dp"
-        android:layout_marginTop="13dp"
+        android:layout_marginTop="16dp"
         android:layout_marginEnd="147dp"
         android:text="Converted Amount"
+        android:textSize="24sp"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.744"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/currencySpinner" />
 

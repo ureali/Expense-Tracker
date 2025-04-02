@@ -30,7 +30,9 @@ import com.example.mad_411_assignments.network.RetrofitInstance
 import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -41,7 +43,7 @@ import java.util.Calendar
 import java.util.Locale
 
 private const val FILE_NAME = "expenses.txt"
-// the requirement of converting currency makes absolute zero sense to me
+// the requirement of converting currency makes absolute zero sense to me (convert from what to what,why, when?)
 // I _guess_ it means all currencies should have an option to be converted to cad
 private val DEFAULT_CURRENCY: Currency = Currency("cad", "Canadian Dollar")
 
@@ -57,6 +59,8 @@ class ExpenseListFragment : Fragment() {
     private lateinit var currencies: List<Currency>
     private var isConverting = false
     private val viewModel: TotalAmountViewModel by viewModels()
+    private val fragmentJob = SupervisorJob()
+    private val fragmentScope = CoroutineScope(Dispatchers.Main + fragmentJob)
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -128,9 +132,17 @@ class ExpenseListFragment : Fragment() {
         val dataset = mutableListOf<Expense>()
 
         // loading expenses
-        dataset.clear()
-        dataset.addAll(loadExpensesFromFile(this.requireContext()))
-        viewModel.totalAmount = dataset.sumOf { it.convertedCost }
+        fragmentScope.launch {
+            //Off load file io to background thread
+            val loadedExpenses = withContext(Dispatchers.IO) {
+                loadExpensesFromFile()
+            }
+            dataset.clear()
+            dataset.addAll(loadedExpenses)
+            expenseAdapter.notifyDataSetChanged()
+            viewModel.totalAmount = dataset.sumOf { it.convertedCost }
+        }
+
 
         expenseAdapter = ExpenseAdapter(
             dataset, this.requireContext(), viewModel, footerFragment,
@@ -147,8 +159,7 @@ class ExpenseListFragment : Fragment() {
 
         // adding onclick event listener
         addNewExpenseButton.setOnClickListener {
-            addExpense()
-            saveExpensesToFile(this.requireContext(), dataset)
+            addExpense(dataset)
         }
 
         datePickerButton.setOnClickListener {
@@ -167,7 +178,7 @@ class ExpenseListFragment : Fragment() {
                     try {
                         val amount = amountString.toDouble()
                         // some formatting goes a long way
-                        convertedAmount.text = String.format(Locale.getDefault(), "%.2f CAD", convertCurrency(currencySpinner.selectedItem.toString().lowercase(), amount).toString())
+                        convertedAmount.text = String.format(Locale.getDefault(), "%.2f CAD", convertCurrency(currencySpinner.selectedItem.toString().lowercase(), amount))
                     } catch (e: NumberFormatException) {
                         expenseAmountEditText.error = "Invalid amount!"
                     }
@@ -199,7 +210,7 @@ class ExpenseListFragment : Fragment() {
 
                 // just to be sure assigning 1.0 if something is wrong
                 val conversionRate: Double = ratesData[currencyCode] ?: 1.0
-                convertedAmount = amount * conversionRate
+                convertedAmount = amount / conversionRate
 
                 // uncomment to test if currencies work
 //                for (currency in currencies) {
@@ -215,7 +226,7 @@ class ExpenseListFragment : Fragment() {
     }
 
     // separate method for adding expense
-    fun addExpense() {
+    fun addExpense(dataset:MutableList<Expense>) {
         val name = expenseNameEditText.text.toString().trim()
         val date = datePickerButton.text.toString()
         var amountString = ""
@@ -223,9 +234,10 @@ class ExpenseListFragment : Fragment() {
         if (!isConverting) {
             amountString = expenseAmountEditText.text.toString().trim()
         } else {
-            amountString = convertedAmount.text.toString().trim()
+            amountString = convertedAmount.text.toString().trim().split(" ")[0]
         }
 
+        Log.d("DEBUG_AMOUNT", amountString)
         var selectedCurrency = DEFAULT_CURRENCY
         try {
             if (!isConverting) {
@@ -270,6 +282,8 @@ class ExpenseListFragment : Fragment() {
             expenseNameEditText.text.clear()
             expenseAmountEditText.text.clear()
             datePickerButton.text = "Pick Date"
+
+            saveExpensesToFile(requireContext(), dataset)
         }
 
 
@@ -307,9 +321,10 @@ class ExpenseListFragment : Fragment() {
 
     private fun saveExpensesToFile(context: Context, taskList: MutableList<Expense>) {
         try {
-            val json = Gson().toJson(taskList)
-            context.openFileOutput(FILE_NAME, Context.MODE_PRIVATE).use { output ->
-                output.write(json.toByteArray())
+            fragmentScope.launch(Dispatchers.IO) {
+                val json = Gson().toJson(taskList)
+                val file = File(context.filesDir, FILE_NAME)
+                file.writeText(json)
             }
             Log.d("FileStorage", "Expenses saved successfully")
         } catch (e: IOException) {
@@ -317,24 +332,15 @@ class ExpenseListFragment : Fragment() {
         }
     }
 
-    private fun loadExpensesFromFile(context: Context): MutableList<Expense> {
+    private fun loadExpensesFromFile(): MutableList<Expense> {
         val expenseList: MutableList<Expense> = mutableListOf()
         try {
-            val file = File(context.filesDir, FILE_NAME)
-            if (!file.exists()) return expenseList
+            val file = File(requireContext().filesDir, FILE_NAME)
+            if (!file.exists()) return mutableListOf()
 
-            // using openFIleInput
-            context.openFileInput(FILE_NAME).use { input ->
-                // does the same job as file.readText()
-                // it's extension function from Kotlin
-                val json = input.bufferedReader().use { it.readText() }
-                val type = object : TypeToken<List<Expense>>() {}.type
-                val loadedTasks: List<Expense> = Gson().fromJson(json, type)
-                expenseList.addAll(loadedTasks)
-                Log.d("FileStorage", "Expenses loaded successfully")
-            }
-
-            Log.d("DEBUG", expenseList.map { it }.joinToString { "\n" })
+            val json = file.readText()
+            val type = object : TypeToken<MutableList<Expense>>() {}.type
+            return Gson().fromJson(json, type)
 
         } catch (e: FileNotFoundException) {
             Log.e("FileStorage", "File not found: ${e.message}")
