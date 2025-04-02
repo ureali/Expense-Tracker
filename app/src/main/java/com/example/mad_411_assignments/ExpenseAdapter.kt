@@ -49,7 +49,7 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Cont
         holder.expenseTextView.text = expense.name.toString()
         holder.dateTextView.text = expense.date.toString()
         // IntelliJ wanted String.format(), happy to oblige.
-        holder.amountTextView.text = String.format(Locale.getDefault(), "$%.2f", expense.amount)
+        holder.amountTextView.text = String.format(Locale.getDefault(), "$%.2f", expense.convertedCost)
 
         // event listener
         holder.deleteButton.setOnClickListener {
@@ -60,7 +60,7 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Cont
             if (index != -1) {
                 // removing
                 dataSet.removeAt(index)
-                totalAmountViewModel.totalAmount -= expense.amount
+                totalAmountViewModel.totalAmount -= expense.convertedCost
                 // updating footer
                 footerFragment.updateAmount()
                 // need to notify to update the recycle view
@@ -80,7 +80,7 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Cont
     // need to insert new expense from other files
     fun addExpense(expense: Expense) {
         dataSet.add(expense)
-        totalAmountViewModel.totalAmount += expense.amount
+        totalAmountViewModel.totalAmount += expense.convertedCost
         footerFragment.updateAmount()
         notifyItemInserted(dataSet.size - 1)
     }

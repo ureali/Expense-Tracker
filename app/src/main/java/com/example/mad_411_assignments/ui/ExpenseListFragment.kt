@@ -19,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mad_411_assignments.ExpenseAdapter
 import com.example.mad_411_assignments.R
+import com.example.mad_411_assignments.model.Conversion
 import com.example.mad_411_assignments.model.Currency
 import com.example.mad_411_assignments.model.Expense
 import com.example.mad_411_assignments.model.viewmodel.TotalAmountViewModel
@@ -27,8 +28,10 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okhttp3.internal.notify
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -91,6 +94,7 @@ class ExpenseListFragment : Fragment() {
 
 
 
+
         childFragmentManager.commit {
             replace(R.id.footerFrameLayout, footerFragment)
             addToBackStack(null)
@@ -108,7 +112,7 @@ class ExpenseListFragment : Fragment() {
         // loading expenses
         dataset.clear()
         dataset.addAll(loadExpensesFromFile(this.requireContext()))
-        viewModel.totalAmount = dataset.sumOf { it.amount }
+        viewModel.totalAmount = dataset.sumOf { it.convertedCost }
 
         expenseAdapter = ExpenseAdapter(
             dataset, this.requireContext(), viewModel, footerFragment,
@@ -135,6 +139,49 @@ class ExpenseListFragment : Fragment() {
 
         return view
 
+    }
+
+    // method to asynchronously update currency
+    fun convertCurrency(currency: Currency, expenseDataset: List<Expense>) {
+        lifecycleScope.launch {
+            // this assignment taught me why API conventions exist :(
+            // it's physically painful to work with this one
+            try {
+                // getting the conversion rates relative to the currency we currently have
+                val response:Map<String, Any> = withContext(Dispatchers.IO) {
+                    RetrofitInstance.api.getConversionRates(selectedCurrency.code)
+                }
+
+                // i don't know what exactly intellij doesn't like, but it works
+                // trying to get the key equal to the currency selected (>:-() and casting it to String, Double
+                // the fun part there are currencies with no conversion rates, it should prevent them from crashing the program
+                val ratesData = response[selectedCurrency.code] as? Map<String, Double>
+                    ?: throw error("Something went wrong with the api :( ")
+
+
+                // just to be sure assigning 1.0 if something is wrong
+                val conversionRate: Double = ratesData[currency.code] ?: 1.0
+
+                // updating expenses
+                for (expense in expenseDataset) {
+                    expense.currency = currency
+                    expense.convertedCost *= conversionRate
+                }
+
+                // updating both recycler view and currency selected
+                expenseAdapter.notifyDataSetChanged()
+                selectedCurrency = currency
+
+                // uncomment to test if currencies work
+//                for (currency in currencies) {
+//                    Log.d("CURRENCIES", "${currency.code}: ${currency.name}")
+//                }
+
+            } catch (e: Exception) {
+                Log.e("ERROR_CURRENCY", "${e.message}")
+                Snackbar.make(requireView(), "Error: ${e.message}", Snackbar.LENGTH_SHORT).show()
+            }
+        }
     }
 
     // separate method for adding expense
@@ -165,7 +212,7 @@ class ExpenseListFragment : Fragment() {
             return
         }
 
-        val expense = Expense(name, amount, date)
+        val expense = Expense(name, amount, date, selectedCurrency)
         expenseAdapter.addExpense(expense)
 
         expenseNameEditText.text.clear()
@@ -216,10 +263,10 @@ class ExpenseListFragment : Fragment() {
     }
 
     private fun loadExpensesFromFile(context: Context): MutableList<Expense> {
-        val taskList: MutableList<Expense> = mutableListOf()
+        val expenseList: MutableList<Expense> = mutableListOf()
         try {
             val file = File(context.filesDir, FILE_NAME)
-            if (!file.exists()) return taskList
+            if (!file.exists()) return expenseList
 
             // using openFIleInput
             context.openFileInput(FILE_NAME).use { input ->
@@ -228,23 +275,25 @@ class ExpenseListFragment : Fragment() {
                 val json = input.bufferedReader().use { it.readText() }
                 val type = object : TypeToken<List<Expense>>() {}.type
                 val loadedTasks: List<Expense> = Gson().fromJson(json, type)
-                taskList.addAll(loadedTasks)
+                expenseList.addAll(loadedTasks)
                 Log.d("FileStorage", "Expenses loaded successfully")
             }
+
+            Log.d("DEBUG", expenseList.map { it }.joinToString { "\n" })
 
         } catch (e: FileNotFoundException) {
             Log.e("FileStorage", "File not found: ${e.message}")
         } catch (e: IOException) {
             Log.e("FileStorage", "Error reading file: ${e.message}")
         }
-        return taskList
+        return expenseList
     }
 
     fun onDetailsClick(expense: Expense) {
         val bundle = Bundle().apply {
             putString("EXPENSE_NAME", expense.name)
             putString("EXPENSE_DATE", expense.date)
-            putDouble("EXPENSE_AMOUNT", expense.amount)
+            putDouble("EXPENSE_AMOUNT", expense.convertedCost)
         }
         findNavController().navigate(R.id.action_mainFragment_to_expenseDetailsFragment, bundle)
     }
