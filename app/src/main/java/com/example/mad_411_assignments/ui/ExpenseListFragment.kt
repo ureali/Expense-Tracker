@@ -1,22 +1,25 @@
-package com.example.mad_411_assignments
+package com.example.mad_411_assignments.ui
 
 import android.app.DatePickerDialog
 import android.content.Context
 import android.os.Bundle
 import android.util.Log
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import androidx.fragment.app.commit
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mad_411_assignments.ExpenseAdapter
+import com.example.mad_411_assignments.R
+import com.example.mad_411_assignments.model.Expense
+import com.example.mad_411_assignments.model.viewmodel.TotalAmountViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import java.io.File
@@ -75,8 +78,10 @@ class ExpenseListFragment : Fragment() {
         dataset.clear()
         dataset.addAll(loadExpensesFromFile(this.requireContext()))
 
-        expenseAdapter = ExpenseAdapter(dataset, this.requireContext(), viewModel, footerFragment,
-            ::saveExpensesToFile, ::onDetailsClick)
+        expenseAdapter = ExpenseAdapter(
+            dataset, this.requireContext(), viewModel, footerFragment,
+            ::saveExpensesToFile, ::onDetailsClick
+        )
 
         // setting up recycler
         val recyclerView: RecyclerView = view.findViewById(R.id.expenseRecyclerView)
@@ -143,7 +148,8 @@ class ExpenseListFragment : Fragment() {
         val calendar = Calendar.getInstance()
 
         // creating datePicker
-        val datePicker = DatePickerDialog(this.requireContext(),
+        val datePicker = DatePickerDialog(
+            this.requireContext(),
             { _, year, month, dayOfMonth ->
                 // updating calendar
                 calendar.set(Calendar.YEAR, year)
@@ -151,11 +157,15 @@ class ExpenseListFragment : Fragment() {
                 calendar.set(Calendar.DAY_OF_MONTH, dayOfMonth)
 
                 // formatting for prettier output
-                datePickerButton.text = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
+                datePickerButton.text =
+                    SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(calendar.time)
 
             },
             // updating date picker with values picked by users
-            calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH), calendar.get(Calendar.DAY_OF_MONTH))
+            calendar.get(Calendar.YEAR),
+            calendar.get(Calendar.MONTH),
+            calendar.get(Calendar.DAY_OF_MONTH)
+        )
 
         // showing date picker
         datePicker.show()

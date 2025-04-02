@@ -7,7 +7,7 @@
     <!-- Main Fragment (Expenses List) -->
     <fragment
         android:id="@+id/mainFragment"
-        android:name="com.example.mad_411_assignments.ExpenseListFragment"
+        android:name="com.example.mad_411_assignments.ui.ExpenseListFragment"
         android:label="Expenses List"
         tools:layout="@layout/fragment_expense_list">
 
@@ -21,7 +21,7 @@
     <!-- Expense Details Fragment -->
     <fragment
         android:id="@+id/expenseDetailsFragment"
-        android:name="com.example.mad_411_assignments.ExpenseDetailsFragment"
+        android:name="com.example.mad_411_assignments.ui.ExpenseDetailsFragment"
         android:label="Expense Details"
         tools:layout="@layout/activity_expense_details" />
 </navigation>

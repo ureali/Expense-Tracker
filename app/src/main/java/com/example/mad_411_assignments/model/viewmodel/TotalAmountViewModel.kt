@@ -1,4 +1,4 @@
-package com.example.mad_411_assignments
+package com.example.mad_411_assignments.model.viewmodel
 
 import androidx.lifecycle.ViewModel
 
