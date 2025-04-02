@@ -1,4 +1,4 @@
-package com.example.mad_411_assignments
+package com.example.mad_411_assignments.ui
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
@@ -6,9 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
-import androidx.activity.enableEdgeToEdge
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import com.example.mad_411_assignments.R
 import java.util.Locale
 
 class ExpenseDetailsFragment : Fragment() {

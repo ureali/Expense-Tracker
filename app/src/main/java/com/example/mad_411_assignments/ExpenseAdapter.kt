@@ -1,17 +1,14 @@
 package com.example.mad_411_assignments
 
 import android.content.Context
-import android.content.Intent
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import android.widget.TextView
-import androidx.core.content.ContextCompat.startActivity
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModel
 import androidx.recyclerview.widget.RecyclerView
+import com.example.mad_411_assignments.model.Expense
+import com.example.mad_411_assignments.model.viewmodel.TotalAmountViewModel
+import com.example.mad_411_assignments.ui.FooterFragment
 import java.util.Locale
 
 // developer.android.com directed me here
@@ -19,7 +16,7 @@ import java.util.Locale
 class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Context,
                      var totalAmountViewModel: TotalAmountViewModel, var footerFragment: FooterFragment,
                      var saveExpensesLambda: (context:Context, dataset:MutableList<Expense>) -> Unit,
-                     var onDetailsClick: (expense:Expense) -> Unit,):RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
+                     var onDetailsClick: (expense: Expense) -> Unit,):RecyclerView.Adapter<ExpenseAdapter.ExpenseViewHolder>() {
 
     class ExpenseViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         // from what I understood, item in recycle view is a separate layout
