@@ -13,15 +13,22 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mad_411_assignments.ExpenseAdapter
 import com.example.mad_411_assignments.R
+import com.example.mad_411_assignments.model.Currency
 import com.example.mad_411_assignments.model.Expense
 import com.example.mad_411_assignments.model.viewmodel.TotalAmountViewModel
+import com.example.mad_411_assignments.network.RetrofitInstance
+import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -37,7 +44,8 @@ class ExpenseListFragment : Fragment() {
     private lateinit var datePickerButton: Button
     private lateinit var addNewExpenseButton: Button
     private lateinit var expenseAdapter: ExpenseAdapter
-
+    private lateinit var currencies: List<Currency>
+    private lateinit var selectedCurrency: Currency
     private val viewModel: TotalAmountViewModel by viewModels()
 
     override fun onCreateView(
@@ -59,6 +67,29 @@ class ExpenseListFragment : Fragment() {
         }
 
         val footerFragment = FooterFragment(viewModel)
+
+        // fetching currencies
+        lifecycleScope.launch {
+            try {
+                currencies = withContext(Dispatchers.IO) {
+                    RetrofitInstance.api.getCurrencies()
+                }.map { (code, name) -> Currency(code, name) }
+
+                // uncomment to test if currencies work
+//                for (currency in currencies) {
+//                    Log.d("CURRENCIES", "${currency.code}: ${currency.name}")
+//                }
+
+            } catch (e: Exception) {
+                Log.e("ERROR_CURRENCY", "${e.message}")
+                Snackbar.make(requireView(), "Error: ${e.message}", Snackbar.LENGTH_SHORT).show()
+            }
+        }
+
+        // cad by default
+        selectedCurrency = Currency("cad", "Canadian Dollar")
+
+
 
         childFragmentManager.commit {
             replace(R.id.footerFrameLayout, footerFragment)
