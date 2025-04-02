@@ -10,6 +10,7 @@ import com.example.mad_411_assignments.model.Expense
 import com.example.mad_411_assignments.model.viewmodel.TotalAmountViewModel
 import com.example.mad_411_assignments.ui.FooterFragment
 import java.util.Locale
+import java.util.Currency as JavaCurrency
 
 // developer.android.com directed me here
 // added context
@@ -48,8 +49,22 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Cont
         // populating textViews
         holder.expenseTextView.text = expense.name.toString()
         holder.dateTextView.text = expense.date.toString()
-        // IntelliJ wanted String.format(), happy to oblige.
-        holder.amountTextView.text = String.format(Locale.getDefault(), "$%.2f", expense.convertedCost)
+
+        // getting java currency symbol
+        val currencyCode = expense.currency.code
+
+        val amount = expense.amount
+
+       try {
+            val javaCurrency = JavaCurrency.getInstance(currencyCode.uppercase())
+            val symbol = javaCurrency.getSymbol()
+
+            holder.amountTextView.text = String.format(Locale.getDefault(), "%s%.2f", symbol, amount)
+
+        } catch (e: IllegalArgumentException) {
+            // the api contains crypto, need to handle it
+            holder.amountTextView.text = String.format(Locale.getDefault(), "%.2f %s", amount, currencyCode.uppercase())
+        }
 
         // event listener
         holder.deleteButton.setOnClickListener {

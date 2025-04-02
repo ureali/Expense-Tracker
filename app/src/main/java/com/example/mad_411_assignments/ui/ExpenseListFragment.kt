@@ -217,8 +217,15 @@ class ExpenseListFragment : Fragment() {
     // separate method for adding expense
     fun addExpense() {
         val name = expenseNameEditText.text.toString().trim()
-        val amountString = expenseAmountEditText.text.toString().trim()
         val date = datePickerButton.text.toString()
+        var amountString = ""
+
+        if (!isConverting) {
+            amountString = expenseAmountEditText.text.toString().trim()
+        } else {
+            amountString = convertedAmount.text.toString().trim()
+        }
+
         var selectedCurrency = DEFAULT_CURRENCY
         try {
             if (!isConverting) {
@@ -341,7 +348,9 @@ class ExpenseListFragment : Fragment() {
         val bundle = Bundle().apply {
             putString("EXPENSE_NAME", expense.name)
             putString("EXPENSE_DATE", expense.date)
-            putDouble("EXPENSE_AMOUNT", expense.convertedCost)
+            putDouble("EXPENSE_AMOUNT", expense.amount)
+            putString("EXPENSE_CODE", expense.currency.code)
+            putDouble("EXPENSE_CONVERTED", expense.convertedCost)
         }
         findNavController().navigate(R.id.action_mainFragment_to_expenseDetailsFragment, bundle)
     }

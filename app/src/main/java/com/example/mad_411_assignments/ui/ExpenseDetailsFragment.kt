@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.example.mad_411_assignments.R
+import java.util.Currency as JavaCurrency
 import java.util.Locale
 
 class ExpenseDetailsFragment : Fragment() {
@@ -18,17 +19,36 @@ class ExpenseDetailsFragment : Fragment() {
         // Inflate the layout for this fragment
         val view = inflater.inflate(R.layout.fragment_expense_details, container, false)
 
-        val name = arguments?.getString("EXPENSE_NAME")
-        val amount = arguments?.getDouble("EXPENSE_AMOUNT", 0.00)
-        val date = arguments?.getString("EXPENSE_DATE")
-
         val nameTextView = view.findViewById<TextView>(R.id.expenseNameTextView)
         val amountTextView = view.findViewById<TextView>(R.id.amountTextView)
+        val convertedTextView = view.findViewById<TextView>(R.id.convertedTextView)
         val dateTextView = view.findViewById<TextView>(R.id.dateTextView)
+
+
+        val name = arguments?.getString("EXPENSE_NAME")
+        val amount = arguments?.getDouble("EXPENSE_AMOUNT", 0.00)
+        val convertedAmount = arguments?.getDouble("EXPENSE_CONVERTED", 0.00)
+
+        // getting java currency symbol
+        val currencyCode = arguments?.getString("EXPENSE_CODE")
+
+        try {
+            val javaCurrency = JavaCurrency.getInstance(currencyCode?.uppercase())
+            val symbol = javaCurrency.getSymbol()
+
+            amountTextView.text = String.format(Locale.getDefault(), "%s%.2f", symbol, amount)
+
+        } catch (e: IllegalArgumentException) {
+            // the api contains crypto, need to handle it
+            amountTextView.text = String.format(Locale.getDefault(), "%.2f %s", amount, currencyCode?.uppercase())
+        }
+
+
+        val date = arguments?.getString("EXPENSE_DATE")
 
         nameTextView.text = name
         // formatting so its always displayed correctly
-        amountTextView.text =  String.format(Locale.getDefault(), "$%.2f", amount)
+        convertedTextView.text =  String.format(Locale.getDefault(), "$%.2f In CAD", convertedAmount)
         dateTextView.text = date
         return view
     }
