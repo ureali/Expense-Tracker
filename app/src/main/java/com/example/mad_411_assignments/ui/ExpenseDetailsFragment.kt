@@ -7,7 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import com.example.mad_411_assignments.R
-import java.util.Currency as JavaCurrency
+import android.icu.util.Currency as AndroidCurrency
 import java.util.Locale
 
 class ExpenseDetailsFragment : Fragment() {
@@ -33,7 +33,7 @@ class ExpenseDetailsFragment : Fragment() {
         val currencyCode = arguments?.getString("EXPENSE_CODE")
 
         try {
-            val javaCurrency = JavaCurrency.getInstance(currencyCode?.uppercase())
+            val javaCurrency = AndroidCurrency.getInstance(currencyCode?.uppercase())
             val symbol = javaCurrency.getSymbol()
 
             amountTextView.text = String.format(Locale.getDefault(), "%s%.2f", symbol, amount)

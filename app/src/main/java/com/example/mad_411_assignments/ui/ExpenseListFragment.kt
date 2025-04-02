@@ -195,7 +195,7 @@ class ExpenseListFragment : Fragment() {
         var convertedAmount = -1.0
             // this assignment taught me why API conventions exist :(
             // it's physically painful to work with this one
-            try {
+        try {
                 // getting the conversion rates relative to the currency we currently have
                 val response:Map<String, Any> = withContext(Dispatchers.IO) {
                     RetrofitInstance.api.getConversionRates(DEFAULT_CURRENCY.code)

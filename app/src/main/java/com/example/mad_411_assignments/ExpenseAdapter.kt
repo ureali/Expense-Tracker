@@ -10,7 +10,7 @@ import com.example.mad_411_assignments.model.Expense
 import com.example.mad_411_assignments.model.viewmodel.TotalAmountViewModel
 import com.example.mad_411_assignments.ui.FooterFragment
 import java.util.Locale
-import java.util.Currency as JavaCurrency
+import android.icu.util.Currency as AndroidCurrency
 
 // developer.android.com directed me here
 // added context
@@ -56,7 +56,7 @@ class ExpenseAdapter(private val dataSet: MutableList<Expense>, var context:Cont
         val amount = expense.amount
 
        try {
-            val javaCurrency = JavaCurrency.getInstance(currencyCode.uppercase())
+            val javaCurrency = AndroidCurrency.getInstance(currencyCode.uppercase())
             val symbol = javaCurrency.getSymbol()
 
             holder.amountTextView.text = String.format(Locale.getDefault(), "%s%.2f", symbol, amount)
