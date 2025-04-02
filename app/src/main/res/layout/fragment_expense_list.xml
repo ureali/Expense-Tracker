@@ -18,6 +18,7 @@
         android:ems="10"
         android:hint="Enter Expense Name"
         android:inputType="text"
+        app:layout_constraintBottom_toTopOf="@+id/expenseAmountEditText"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -27,12 +28,13 @@
         style="@android:style/Widget.Material.EditText"
         android:layout_width="wrap_content"
         android:layout_height="48dp"
-        android:layout_marginStart="102dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="100dp"
+        android:layout_marginStart="100dp"
+        android:layout_marginEnd="101dp"
+        android:layout_marginBottom="13dp"
         android:ems="10"
         android:hint="Enter Expense Amount"
         android:inputType="text"
+        app:layout_constraintBottom_toTopOf="@+id/conversionNeededCheckBox"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/expenseNameEditText" />
@@ -43,10 +45,13 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="140dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="4dp"
         android:layout_marginEnd="139dp"
+        android:layout_marginBottom="20dp"
         android:text="Add Expense"
+        app:layout_constraintBottom_toTopOf="@+id/expenseRecyclerView"
         app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/datePickerButton" />
 
@@ -54,7 +59,7 @@
         android:id="@+id/expenseRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="425dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="22dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -67,13 +72,12 @@
         android:layout_width="112dp"
         android:layout_height="48dp"
         android:layout_marginStart="160dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="40dp"
         android:layout_marginEnd="161dp"
         android:text="Pick Date"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.473"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/expenseAmountEditText" />
+        app:layout_constraintTop_toBottomOf="@+id/convertedAmount" />
 
     <FrameLayout
         android:id="@+id/headerFrameLayout"
@@ -93,5 +97,42 @@
         app:layout_constraintEnd_toEndOf="parent">
 
     </FrameLayout>
+
+    <CheckBox
+        android:id="@+id/conversionNeededCheckBox"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="126dp"
+        android:layout_marginTop="13dp"
+        android:layout_marginEnd="126dp"
+        android:text="Conversion Needed"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/expenseAmountEditText" />
+
+    <Spinner
+        android:id="@+id/currencySpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="1dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/conversionNeededCheckBox" />
+
+    <TextView
+        android:id="@+id/convertedAmount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="147dp"
+        android:layout_marginTop="13dp"
+        android:layout_marginEnd="147dp"
+        android:text="Converted Amount"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/currencySpinner" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

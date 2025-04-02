@@ -7,8 +7,12 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.Spinner
+import android.widget.TextView
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.commit
@@ -19,7 +23,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mad_411_assignments.ExpenseAdapter
 import com.example.mad_411_assignments.R
-import com.example.mad_411_assignments.model.Conversion
 import com.example.mad_411_assignments.model.Currency
 import com.example.mad_411_assignments.model.Expense
 import com.example.mad_411_assignments.model.viewmodel.TotalAmountViewModel
@@ -28,10 +31,8 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import okhttp3.internal.notify
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -40,15 +41,21 @@ import java.util.Calendar
 import java.util.Locale
 
 private const val FILE_NAME = "expenses.txt"
+// the requirement of converting currency makes absolute zero sense to me
+// I _guess_ it means all currencies should have an option to be converted to cad
+private val DEFAULT_CURRENCY: Currency = Currency("cad", "Canadian Dollar")
 
 class ExpenseListFragment : Fragment() {
     private lateinit var expenseNameEditText: EditText
     private lateinit var expenseAmountEditText: EditText
+    private lateinit var conversionNeededCheckBox: CheckBox
+    private lateinit var currencySpinner: Spinner
+    private lateinit var convertedAmount: TextView
     private lateinit var datePickerButton: Button
     private lateinit var addNewExpenseButton: Button
     private lateinit var expenseAdapter: ExpenseAdapter
     private lateinit var currencies: List<Currency>
-    private lateinit var selectedCurrency: Currency
+    private var isConverting = false
     private val viewModel: TotalAmountViewModel by viewModels()
 
     override fun onCreateView(
@@ -71,12 +78,38 @@ class ExpenseListFragment : Fragment() {
 
         val footerFragment = FooterFragment(viewModel)
 
+
+        childFragmentManager.commit {
+            replace(R.id.footerFrameLayout, footerFragment)
+            addToBackStack(null)
+        }
+
+        expenseNameEditText = view.findViewById<EditText>(R.id.expenseNameEditText)
+        expenseAmountEditText = view.findViewById<EditText>(R.id.expenseAmountEditText)
+        datePickerButton = view.findViewById<Button>(R.id.datePickerButton)
+        addNewExpenseButton = view.findViewById<Button>(R.id.addNewExpenseButton)
+        conversionNeededCheckBox = view.findViewById<CheckBox>(R.id.conversionNeededCheckBox)
+        currencySpinner = view.findViewById<Spinner>(R.id.currencySpinner)
+        convertedAmount = view.findViewById<TextView>(R.id.convertedAmount)
+
         // fetching currencies
         lifecycleScope.launch {
             try {
                 currencies = withContext(Dispatchers.IO) {
                     RetrofitInstance.api.getCurrencies()
                 }.map { (code, name) -> Currency(code, name) }
+
+                // converting the currencies to something more user-readable
+                val spinnerCurrencies = currencies.map { currency ->
+                    currency.code.uppercase()
+                }
+
+                val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item, spinnerCurrencies)
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+                currencySpinner.adapter = adapter
+
+                // selecting cad
+                currencySpinner.setSelection(spinnerCurrencies.indexOf(DEFAULT_CURRENCY.code.uppercase()))
 
                 // uncomment to test if currencies work
 //                for (currency in currencies) {
@@ -89,21 +122,6 @@ class ExpenseListFragment : Fragment() {
             }
         }
 
-        // cad by default
-        selectedCurrency = Currency("cad", "Canadian Dollar")
-
-
-
-
-        childFragmentManager.commit {
-            replace(R.id.footerFrameLayout, footerFragment)
-            addToBackStack(null)
-        }
-
-        expenseNameEditText = view.findViewById<EditText>(R.id.expenseNameEditText)
-        expenseAmountEditText = view.findViewById<EditText>(R.id.expenseAmountEditText)
-        datePickerButton = view.findViewById<Button>(R.id.datePickerButton)
-        addNewExpenseButton = view.findViewById<Button>(R.id.addNewExpenseButton)
 
         // developer.android.com ♥
         // creating dataset
@@ -137,40 +155,51 @@ class ExpenseListFragment : Fragment() {
             showDateDialog()
         }
 
+        conversionNeededCheckBox.setOnClickListener{
+            isConverting = !isConverting
+        }
+
+        expenseAmountEditText.setOnFocusChangeListener { view, hasFocus ->
+            if (isConverting) {
+                val amountString = expenseAmountEditText.text.toString().trim()
+
+                lifecycleScope.launch {
+                    try {
+                        val amount = amountString.toDouble()
+                        // some formatting goes a long way
+                        convertedAmount.text = String.format(Locale.getDefault(), "%.2f CAD", convertCurrency(currencySpinner.selectedItem.toString().lowercase(), amount).toString())
+                    } catch (e: NumberFormatException) {
+                        expenseAmountEditText.error = "Invalid amount!"
+                    }
+                }
+            }
+        }
+
         return view
 
     }
 
     // method to asynchronously update currency
-    fun convertCurrency(currency: Currency, expenseDataset: List<Expense>) {
-        lifecycleScope.launch {
+    suspend fun convertCurrency(currencyCode: String, amount: Double):Double {
+        var convertedAmount = -1.0
             // this assignment taught me why API conventions exist :(
             // it's physically painful to work with this one
             try {
                 // getting the conversion rates relative to the currency we currently have
                 val response:Map<String, Any> = withContext(Dispatchers.IO) {
-                    RetrofitInstance.api.getConversionRates(selectedCurrency.code)
+                    RetrofitInstance.api.getConversionRates(DEFAULT_CURRENCY.code)
                 }
 
                 // i don't know what exactly intellij doesn't like, but it works
                 // trying to get the key equal to the currency selected (>:-() and casting it to String, Double
                 // the fun part there are currencies with no conversion rates, it should prevent them from crashing the program
-                val ratesData = response[selectedCurrency.code] as? Map<String, Double>
+                val ratesData = response[DEFAULT_CURRENCY.code] as? Map<String, Double>
                     ?: throw error("Something went wrong with the api :( ")
 
 
                 // just to be sure assigning 1.0 if something is wrong
-                val conversionRate: Double = ratesData[currency.code] ?: 1.0
-
-                // updating expenses
-                for (expense in expenseDataset) {
-                    expense.currency = currency
-                    expense.convertedCost *= conversionRate
-                }
-
-                // updating both recycler view and currency selected
-                expenseAdapter.notifyDataSetChanged()
-                selectedCurrency = currency
+                val conversionRate: Double = ratesData[currencyCode] ?: 1.0
+                convertedAmount = amount * conversionRate
 
                 // uncomment to test if currencies work
 //                for (currency in currencies) {
@@ -181,7 +210,8 @@ class ExpenseListFragment : Fragment() {
                 Log.e("ERROR_CURRENCY", "${e.message}")
                 Snackbar.make(requireView(), "Error: ${e.message}", Snackbar.LENGTH_SHORT).show()
             }
-        }
+
+        return convertedAmount
     }
 
     // separate method for adding expense
@@ -189,6 +219,16 @@ class ExpenseListFragment : Fragment() {
         val name = expenseNameEditText.text.toString().trim()
         val amountString = expenseAmountEditText.text.toString().trim()
         val date = datePickerButton.text.toString()
+        var selectedCurrency = DEFAULT_CURRENCY
+        try {
+            if (!isConverting) {
+                selectedCurrency = currencies.find{ it.code == currencySpinner.selectedItem.toString().lowercase()}!!
+            }
+        } catch (e:Error) {
+            Toast.makeText(this.requireContext(), "CURRENCIES NOT LOADED OR SELECTED", Toast.LENGTH_SHORT).show()
+            return
+        }
+
 
 
         if (expenseNameEditText.text.toString().isEmpty()) {
@@ -212,12 +252,20 @@ class ExpenseListFragment : Fragment() {
             return
         }
 
-        val expense = Expense(name, amount, date, selectedCurrency)
-        expenseAdapter.addExpense(expense)
+        // I don't really understand what converted amount means (???) and why should we implement it
+        // but ok, I'll assume it's amount converted to CAD
+        lifecycleScope.launch {
+            val convertedAmount = convertCurrency(selectedCurrency.code, amount)
 
-        expenseNameEditText.text.clear()
-        expenseAmountEditText.text.clear()
-        datePickerButton.text = "Pick Date"
+            val expense = Expense(name, amount, date, selectedCurrency, convertedAmount)
+            expenseAdapter.addExpense(expense)
+
+            expenseNameEditText.text.clear()
+            expenseAmountEditText.text.clear()
+            datePickerButton.text = "Pick Date"
+        }
+
+
     }
 
     // docs were pretty much useless in this case, but I hope I got it right
